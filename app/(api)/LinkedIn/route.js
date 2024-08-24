@@ -1,29 +1,4 @@
-import { Innertube } from 'youtubei.js/web'
-
-const fetchTranscript = async (url) => {
-  const youtube = await Innertube.create({
-    lang: 'en',
-    location: 'US',
-    retrieve_player: false,
-  })
-
-  try {
-    const info = await youtube.getInfo(url)
-    const transcriptData = await info.getTranscript()
-    return transcriptData.transcript.content.body.initial_segments.map(
-      (segment) => segment.snippet.text
-    )
-  } catch (error) {
-    console.error('Error fetching transcript:', error)
-    throw error
-  }
-}
-
-async function getYouTubeTranscript(videoUrl) {
-  const videoId = new URL(videoUrl).searchParams.get('v')
-  const transcript = await fetchTranscript(videoId)
-  return transcript?.join(' ')
-}
+import { geminiModel, getYouTubeTranscript } from '@/lib/utils'
 
 export async function GET(request) {
   const searchParams = request.nextUrl.searchParams
@@ -32,9 +7,15 @@ export async function GET(request) {
 
   const transcript = await getYouTubeTranscript(url)
 
-  return new Response(JSON.stringify({ transcript }))
-}
+  const prompt = `
+  Act as a user who created a video on youtube now create a post for LinkedIn. The character limit must be below 1000 also add necessary hashtags at the end of the post. Use the below transcript to frame your response:
+  Transcript: ${transcript}
+  `
+  const result = await geminiModel.generateContent(prompt)
+  const response = result.response.text()
+  console.log(response)
 
-// export async function GET() {
-//   return new Response('API route is working')
-// }
+  return new Response(JSON.stringify({ response }), {
+    headers: { 'Content-Type': 'application/json' },
+  })
+}

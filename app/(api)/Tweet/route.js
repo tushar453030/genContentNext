@@ -1,4 +1,4 @@
-import { getYouTubeTranscript } from '@/lib/utils'
+import { geminiModel, getYouTubeTranscript } from '@/lib/utils'
 
 export async function GET(request) {
   const searchParams = request.nextUrl.searchParams
@@ -7,5 +7,15 @@ export async function GET(request) {
 
   const transcript = await getYouTubeTranscript(url)
 
-  return new Response(JSON.stringify({ transcript }))
+  const prompt = `
+    Act as a user who created a video on youtube now create a tweet for Twitter. The character limit must be below 200 also add necessary hashtags at the end of the post. Use the below transcript to frame your response:
+    Transcript: ${cleanedTranscript}
+    `
+  const result = await geminiModel.generateContent(prompt)
+  const response = result.response.text()
+  console.log(response)
+
+  return new Response(JSON.stringify({ response }), {
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
