@@ -24,7 +24,7 @@ export async function GET(request) {
   const response = result.response.text()
   console.log(response)
 
-  return new Response(JSON.stringify({ response: responseText }), {
+  return new Response(JSON.stringify({ response: response }), {
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
