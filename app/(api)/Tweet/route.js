@@ -1,6 +1,15 @@
 import { geminiModel, getYouTubeTranscript } from '@/lib/utils'
 
 export async function GET(request) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    })
+  }
   const searchParams = request.nextUrl.searchParams
   const url = searchParams.get('url')
   console.log(url)
@@ -15,7 +24,12 @@ export async function GET(request) {
   const response = result.response.text()
   console.log(response)
 
-  return new Response(JSON.stringify({ response }), {
-    headers: { 'Content-Type': 'application/json' },
+  return new Response(JSON.stringify({ response: response }), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
   })
 }
