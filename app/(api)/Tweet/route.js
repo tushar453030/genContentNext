@@ -9,7 +9,7 @@ export async function GET(request) {
 
   const prompt = `
     Act as a user who created a video on youtube now create a tweet for Twitter. The character limit must be below 200 also add necessary hashtags at the end of the post. Use the below transcript to frame your response:
-    Transcript: ${cleanedTranscript}
+    Transcript: ${transcript}
     `
   const result = await geminiModel.generateContent(prompt)
   const response = result.response.text()
