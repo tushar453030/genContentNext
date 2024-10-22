@@ -15,6 +15,7 @@ export async function GET(request) {
   console.log(url)
 
   const transcript = await getYouTubeTranscript(url)
+  console.log(transcript)
 
   const prompt = `
   Act as a user who created a video on youtube now create a post for LinkedIn. The character limit must be below 1000 also add necessary hashtags at the end of the post. Use the below transcript to frame your response:
