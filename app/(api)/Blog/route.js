@@ -1,5 +1,8 @@
 import { geminiModel, getYouTubeTranscript } from '@/lib/utils'
 import axios from 'axios'
+import NodeCache from 'node-cache'
+
+const cache = new NodeCache({ stdTTL: 86400 }) // 1 day TTL in seconds
 
 export async function GET(request) {
   if (request.method === 'OPTIONS') {
@@ -13,6 +16,19 @@ export async function GET(request) {
   }
   const searchParams = request.nextUrl.searchParams
   const url = searchParams.get('url')
+
+  const cachedResponse = cache.get(url)
+  if (cachedResponse) {
+    console.log('Cache hit!')
+    return new Response(JSON.stringify({ response: cachedResponse }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    })
+  }
 
   const options = {
     method: 'POST',
@@ -48,6 +64,8 @@ export async function GET(request) {
   const result = await geminiModel.generateContent(prompt)
   response = result.response.text()
   console.log(response)
+
+  cache.set(url, response)
 
   return new Response(JSON.stringify({ response: response }), {
     headers: {
